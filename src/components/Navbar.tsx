@@ -27,7 +27,8 @@ type Product = {
 };
 
 const BASE_URL =
-  "https://api.api-store.workers.dev/api/bazardor";
+  // "https://api.api-store.workers.dev/api/bazardor";
+  "https://openapi.programming-hero.com/api/bazardor"
 
 function getBengaliDate() {
   return new Intl.DateTimeFormat("bn-BD", {

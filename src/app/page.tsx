@@ -296,7 +296,11 @@ export default function HomePage() {
               subtitle="গতকালের তুলনায় যেসব পণ্যের দাম কমেছে"
               products={fallers}
               
-             icon="▼" 
+              
+             icon="▼"
+             
+             
+             
               emptyMessage="এই মুহূর্তে দাম কমার তথ্য পাওয়া যায়নি।"
             />
 

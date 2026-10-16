@@ -1,9 +1,60 @@
-
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export default function SignInPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSignIn(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const { error } = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message || "ইমেইল বা পাসওয়ার্ড সঠিক নয়।");
+        return;
+      }
+
+      router.push("/");
+      router.refresh();
+    } catch {
+      setError("সাইন ইন করা যায়নি। আবার চেষ্টা করুন।");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSocialSignIn(provider: "google" | "github") {
+    setError("");
+
+    try {
+      const { error } = await authClient.signIn.social({
+        provider,
+        callbackURL: "/",
+      });
+
+      if (error) {
+        setError(error.message || "সাইন ইন করা যায়নি।");
+      }
+    } catch {
+      setError("সামাজিক লগইন চালু নেই বা সংযোগে সমস্যা হয়েছে।");
+    }
+  }
+
   return (
     <section className="flex min-h-[75vh] items-center justify-center bg-[#f6f9f5] px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
@@ -25,18 +76,20 @@ export default function SignInPage() {
           </p>
         </div>
 
-        <form className="space-y-4">
+        <form onSubmit={handleSignIn} className="space-y-4">
           <div>
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
               ইমেইল ঠিকানা
             </label>
             <input
               id="email"
-              name="email"
               type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               placeholder="আপনার ইমেইল লিখুন"
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
             />
           </div>
 
@@ -46,28 +99,28 @@ export default function SignInPage() {
             </label>
             <input
               id="password"
-              name="password"
               type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
               placeholder="আপনার পাসওয়ার্ড লিখুন"
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100"
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
             />
           </div>
 
-          <div className="flex justify-end">
-            <button
-              type="button"
-              className="text-sm font-medium text-green-700 hover:text-green-800"
-            >
-              পাসওয়ার্ড ভুলে গেছেন?
-            </button>
-          </div>
+          {error && (
+            <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-green-700 py-3 font-semibold text-white transition hover:bg-green-800"
+            disabled={loading}
+            className="w-full rounded-lg bg-green-700 py-3 font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            সাইন ইন করুন
+            {loading ? "সাইন ইন হচ্ছে..." : "সাইন ইন করুন"}
           </button>
         </form>
 
@@ -80,17 +133,16 @@ export default function SignInPage() {
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            onClick={() => handleSocialSignIn("google")}
+            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            <span className="font-bold text-base">G</span>
             Google
           </button>
-
           <button
             type="button"
-            className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            onClick={() => handleSocialSignIn("github")}
+            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            <span className="font-bold text-base">⌘</span>
             GitHub
           </button>
         </div>

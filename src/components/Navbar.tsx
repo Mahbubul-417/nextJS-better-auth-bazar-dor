@@ -1,8 +1,10 @@
+
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 type Category = {
   id: string;
@@ -26,9 +28,7 @@ type Product = {
   };
 };
 
-const BASE_URL =
-  // "https://api.api-store.workers.dev/api/bazardor";
-  "https://openapi.programming-hero.com/api/bazardor"
+const BASE_URL = "https://openapi.programming-hero.com/api/bazardor";
 
 function getBengaliDate() {
   return new Intl.DateTimeFormat("bn-BD", {
@@ -41,11 +41,7 @@ function getBengaliDate() {
 
 function toBengaliNumber(value: number) {
   const bengaliDigits = "০১২৩৪৫৬৭৮৯";
-
-  return String(value).replace(
-    /\d/g,
-    (digit) => bengaliDigits[Number(digit)]
-  );
+  return String(value).replace(/\d/g, (digit) => bengaliDigits[Number(digit)]);
 }
 
 function getUnitName(unit: string) {
@@ -64,15 +60,17 @@ function getUnitName(unit: string) {
 export default function Navbar() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
     async function loadNavbarData() {
       try {
-        const [categoriesResponse, productsResponse] =
-          await Promise.all([
-            fetch(`${BASE_URL}/categories`),
-            fetch(`${BASE_URL}/products`),
-          ]);
+        const [categoriesResponse, productsResponse] = await Promise.all([
+          fetch(`${BASE_URL}/categories`),
+          fetch(`${BASE_URL}/products`),
+        ]);
 
         if (!categoriesResponse.ok || !productsResponse.ok) {
           throw new Error("Failed to fetch navbar data");
@@ -100,20 +98,33 @@ export default function Navbar() {
     loadNavbarData();
   }, []);
 
+  async function handleSignOut() {
+    setLoggingOut(true);
+
+    try {
+      const { error } = await authClient.signOut();
+
+      if (error) {
+        console.error("Sign-out failed:", error);
+        return;
+      }
+
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Sign-out failed:", error);
+    } finally {
+      setLoggingOut(false);
+    }
+  }
+
   const date = getBengaliDate();
 
   return (
-    <header className="bg-white border-b border-gray-200">
-
-      
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="min-h-[76px] flex items-center justify-between gap-4">
-
-          <Link
-            href="/"
-            className="flex items-center gap-3 shrink-0"
-          >
-            <div className="w-12 h-12 rounded-xl bg-green-600 flex items-center justify-center">
+    <header className="border-b border-gray-200 bg-white">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="flex min-h-[76px] items-center justify-between gap-4">
+          <Link href="/" className="flex shrink-0 items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-600">
               <Image
                 src="/images/logo-icon.png"
                 alt="বাজার দর"
@@ -124,52 +135,66 @@ export default function Navbar() {
             </div>
 
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 leading-none">
+              <h1 className="text-xl font-bold leading-none text-gray-800 sm:text-2xl">
                 বাজার দর
               </h1>
-
-              <p className="text-xs text-gray-500 mt-1">
-                {date}
-              </p>
+              <p className="mt-1 text-xs text-gray-500">{date}</p>
             </div>
           </Link>
 
-          <div className="flex items-center gap-1 sm:gap-2">
-            <Link
-              href="/signin"
-              className="hidden sm:block px-4 py-2 text-sm font-medium text-gray-700 hover:text-green-600 transition"
-            >
-              সাইন ইন
-            </Link>
+          <div className="flex items-center gap-2">
+            {isPending ? (
+              <span className="text-sm text-gray-500">লোড হচ্ছে...</span>
+            ) : session?.user ? (
+              <>
+                <span className="hidden max-w-36 truncate text-sm font-medium text-gray-700 sm:block">
+                  {session.user.name || session.user.email}
+                </span>
 
-            <Link
-              href="/signup"
-              className="px-3 sm:px-5 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition"
-            >
-              সাইন আপ
-            </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  disabled={loggingOut}
+                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-red-200 hover:text-red-600 disabled:opacity-60 sm:px-4"
+                >
+                  {loggingOut ? "লগ আউট হচ্ছে..." : "লগ আউট"}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signin"
+                  className="hidden px-3 py-2 text-sm font-medium text-gray-700 transition hover:text-green-600 sm:block sm:px-4"
+                >
+                  সাইন ইন
+                </Link>
+
+                <Link
+                  href="/signup"
+                  className="rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-green-700 sm:px-5"
+                >
+                  সাইন আপ
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      
       <nav className="border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 overflow-x-auto">
-          <div className="flex items-center min-w-max">
+        <div className="mx-auto max-w-6xl overflow-x-auto px-4">
+          <div className="flex min-w-max items-center">
             {categories.map((category, index) => (
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className={`px-4 py-3 text-sm whitespace-nowrap border-b-2 transition ${
+                className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm transition ${
                   index === 0
-                    ? "text-green-700 font-semibold border-green-600"
-                    : "text-gray-600 border-transparent hover:text-green-700 hover:border-green-300"
+                    ? "border-green-600 font-semibold text-green-700"
+                    : "border-transparent text-gray-600 hover:border-green-300 hover:text-green-700"
                 }`}
               >
-                <span className="mr-1">
-                  {category.icon}
-                </span>
-
+                <span className="mr-1">{category.icon}</span>
                 {category.nameBn}
               </Link>
             ))}
@@ -177,10 +202,8 @@ export default function Navbar() {
         </div>
       </nav>
 
-      
-      <div className="border-t border-gray-100 bg-gray-50 overflow-hidden">
+      <div className="overflow-hidden border-t border-gray-100 bg-gray-50">
         <div className="flex w-max animate-[marquee_30s_linear_infinite]">
-
           {[...products, ...products].map((product, index) => {
             const isUp = product.change.dir === "up";
             const isDown = product.change.dir === "down";
@@ -188,13 +211,11 @@ export default function Navbar() {
             return (
               <div
                 key={`${product.id}-${index}`}
-                className="flex items-center gap-2 px-5 py-2.5 border-r border-gray-200 text-sm"
+                className="flex items-center gap-2 border-r border-gray-200 px-5 py-2.5 text-sm"
               >
                 <span>{product.categoryIcon}</span>
 
-                <span className="text-gray-700">
-                  {product.nameBn}
-                </span>
+                <span className="text-gray-700">{product.nameBn}</span>
 
                 <span className="font-medium text-gray-800">
                   {toBengaliNumber(product.today)} টাকা/
@@ -204,9 +225,9 @@ export default function Navbar() {
                 <span
                   className={`font-semibold ${
                     isUp
-                      ? "text-green-600"
+                      ? "text-red-500"
                       : isDown
-                        ? "text-red-500"
+                        ? "text-green-600"
                         : "text-gray-500"
                   }`}
                 >
@@ -219,10 +240,8 @@ export default function Navbar() {
               </div>
             );
           })}
-
         </div>
       </div>
-
     </header>
   );
 }

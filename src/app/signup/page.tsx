@@ -1,8 +1,10 @@
+
 "use client";
 
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignUpPage() {
@@ -14,18 +16,23 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
 
   async function handleSignUp(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
     if (password !== confirmPassword) {
-      setError("দুটি পাসওয়ার্ড মিলছে না।");
+      const message = "দুটি পাসওয়ার্ড মিলছে না।";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     if (password.length < 8) {
-      setError("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।");
+      const message = "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।";
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -33,38 +40,40 @@ export default function SignUpPage() {
 
     try {
       const { error } = await authClient.signUp.email({
-        name,
-        email,
+        name: name.trim(),
+        email: email.trim(),
         password,
       });
 
-      
-
       if (error) {
-  console.error("Better Auth sign-up error:", error);
-  setError(error.message || "অ্যাকাউন্ট তৈরি করা যায়নি।");
-  return;
-}
+        console.error("Better Auth sign-up error:", error);
+        const message = error.message || "অ্যাকাউন্ট তৈরি করা যায়নি।";
+        setError(message);
+        toast.error(message);
+        return;
+      }
 
+      toast.success("আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
       router.push("/");
       router.refresh();
+    } catch (error: unknown) {
+      console.error("Signup failed:", error);
 
-} catch (error: unknown) {
-  console.error("Signup failed:", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "অ্যাকাউন্ট তৈরি করা যায়নি। আবার চেষ্টা করুন।";
 
-  if (error instanceof Error) {
-    setError(error.message);
-  } else {
-    setError("Signup failed. Check the terminal for details.");
-  }
-}
-    finally {
+      setError(message);
+      toast.error(message);
+    } finally {
       setLoading(false);
     }
   }
 
   async function handleSocialSignUp(provider: "google" | "github") {
     setError("");
+    setSocialLoading(true);
 
     try {
       const { error } = await authClient.signIn.social({
@@ -73,10 +82,17 @@ export default function SignUpPage() {
       });
 
       if (error) {
-        setError(error.message || "সাইন আপ করা যায়নি।");
+        const message = error.message || "সাইন আপ করা যায়নি।";
+        setError(message);
+        toast.error(message);
+        setSocialLoading(false);
       }
     } catch {
-      setError("সামাজিক লগইন চালু নেই বা সংযোগে সমস্যা হয়েছে।");
+      const message =
+        "সামাজিক লগইন চালু নেই বা সংযোগে সমস্যা হয়েছে।";
+      setError(message);
+      toast.error(message);
+      setSocialLoading(false);
     }
   }
 
@@ -103,7 +119,10 @@ export default function SignUpPage() {
 
         <form onSubmit={handleSignUp} className="space-y-4">
           <div>
-            <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
               আপনার নাম
             </label>
             <input
@@ -119,7 +138,10 @@ export default function SignUpPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
               ইমেইল ঠিকানা
             </label>
             <input
@@ -135,7 +157,10 @@ export default function SignUpPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
               পাসওয়ার্ড
             </label>
             <input
@@ -152,7 +177,10 @@ export default function SignUpPage() {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="confirmPassword"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
               পাসওয়ার্ড নিশ্চিত করুন
             </label>
             <input
@@ -169,14 +197,17 @@ export default function SignUpPage() {
           </div>
 
           {error && (
-            <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <p
+              role="alert"
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+            >
               {error}
             </p>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || socialLoading}
             className="w-full rounded-lg bg-green-700 py-3 font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
@@ -192,23 +223,29 @@ export default function SignUpPage() {
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
+            disabled={loading || socialLoading}
             onClick={() => handleSocialSignUp("google")}
-            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
           >
-            Google
+            {socialLoading ? "অপেক্ষা করুন..." : "Google"}
           </button>
+
           <button
             type="button"
+            disabled={loading || socialLoading}
             onClick={() => handleSocialSignUp("github")}
-            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
           >
-            GitHub
+            {socialLoading ? "অপেক্ষা করুন..." : "GitHub"}
           </button>
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-600">
           ইতিমধ্যে অ্যাকাউন্ট আছে?{" "}
-          <Link href="/signin" className="font-semibold text-green-700 hover:underline">
+          <Link
+            href="/signin"
+            className="font-semibold text-green-700 hover:underline"
+          >
             সাইন ইন করুন
           </Link>
         </p>
@@ -216,4 +253,3 @@ export default function SignUpPage() {
     </section>
   );
 }
-

@@ -1,8 +1,10 @@
+
 "use client";
 
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignInPage() {
@@ -12,34 +14,52 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState(false);
 
   async function handleSignIn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+
+    if (!email.trim() || !password) {
+      const message = "ইমেইল ও পাসওয়ার্ড লিখুন।";
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error } = await authClient.signIn.email({
-        email,
+        email: email.trim(),
         password,
       });
 
       if (error) {
-        setError(error.message || "ইমেইল বা পাসওয়ার্ড সঠিক নয়।");
+        const message =
+          error.message || "ইমেইল বা পাসওয়ার্ড সঠিক নয়।";
+        setError(message);
+        toast.error(message);
         return;
       }
 
+      toast.success("সফলভাবে সাইন ইন হয়েছে!");
       router.push("/");
       router.refresh();
     } catch {
-      setError("সাইন ইন করা যায়নি। আবার চেষ্টা করুন।");
+      const message = "সাইন ইন করা যায়নি। আবার চেষ্টা করুন।";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleSocialSignIn(provider: "google" | "github") {
+  async function handleSocialSignIn(
+    provider: "google" | "github"
+  ) {
     setError("");
+    setSocialLoading(true);
 
     try {
       const { error } = await authClient.signIn.social({
@@ -48,10 +68,17 @@ export default function SignInPage() {
       });
 
       if (error) {
-        setError(error.message || "সাইন ইন করা যায়নি।");
+        const message = error.message || "সাইন ইন করা যায়নি।";
+        setError(message);
+        toast.error(message);
+        setSocialLoading(false);
       }
     } catch {
-      setError("সামাজিক লগইন চালু নেই বা সংযোগে সমস্যা হয়েছে।");
+      const message =
+        "সামাজিক লগইন চালু নেই বা সংযোগে সমস্যা হয়েছে।";
+      setError(message);
+      toast.error(message);
+      setSocialLoading(false);
     }
   }
 
@@ -78,7 +105,10 @@ export default function SignInPage() {
 
         <form onSubmit={handleSignIn} className="space-y-4">
           <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
               ইমেইল ঠিকানা
             </label>
             <input
@@ -94,7 +124,10 @@ export default function SignInPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
+            >
               পাসওয়ার্ড
             </label>
             <input
@@ -110,14 +143,17 @@ export default function SignInPage() {
           </div>
 
           {error && (
-            <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <p
+              role="alert"
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-700"
+            >
               {error}
             </p>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || socialLoading}
             className="w-full rounded-lg bg-green-700 py-3 font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "সাইন ইন হচ্ছে..." : "সাইন ইন করুন"}
@@ -133,23 +169,28 @@ export default function SignInPage() {
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
+            disabled={loading || socialLoading}
             onClick={() => handleSocialSignIn("google")}
-            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
           >
-            Google
+            {socialLoading ? "অপেক্ষা করুন..." : "Google"}
           </button>
           <button
             type="button"
+            disabled={loading || socialLoading}
             onClick={() => handleSocialSignIn("github")}
-            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
           >
-            GitHub
+            {socialLoading ? "অপেক্ষা করুন..." : "GitHub"}
           </button>
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-600">
           অ্যাকাউন্ট নেই?{" "}
-          <Link href="/signup" className="font-semibold text-green-700 hover:underline">
+          <Link
+            href="/signup"
+            className="font-semibold text-green-700 hover:underline"
+          >
             সাইন আপ করুন
           </Link>
         </p>

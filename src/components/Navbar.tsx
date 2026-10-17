@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
 
 type Category = {
@@ -106,12 +107,14 @@ export default function Navbar() {
 
       if (error) {
         console.error("Sign-out failed:", error);
+        toast.error(error.message || "লগ আউট করা যায়নি। আবার চেষ্টা করুন।");
         return;
       }
 
-      window.location.href = "/";
+      toast.success("সফলভাবে লগ আউট হয়েছে!");
     } catch (error) {
       console.error("Sign-out failed:", error);
+      toast.error("লগ আউট করা যায়নি। আবার চেষ্টা করুন।");
     } finally {
       setLoggingOut(false);
     }
@@ -151,11 +154,18 @@ export default function Navbar() {
                   {session.user.name || session.user.email}
                 </span>
 
+                <Link
+                  href="/profile"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-green-700 transition hover:bg-green-50"
+                >
+                  My Profile
+                </Link>
+                
                 <button
                   type="button"
                   onClick={handleSignOut}
                   disabled={loggingOut}
-                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-red-200 hover:text-red-600 disabled:opacity-60 sm:px-4"
+                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-red-300 hover:text-red-600 disabled:opacity-60 sm:px-4"
                 >
                   {loggingOut ? "লগ আউট হচ্ছে..." : "লগ আউট"}
                 </button>
@@ -188,11 +198,10 @@ export default function Navbar() {
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm transition ${
-                  index === 0
+                className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm transition ${index === 0
                     ? "border-green-600 font-semibold text-green-700"
                     : "border-transparent text-gray-600 hover:border-green-300 hover:text-green-700"
-                }`}
+                  }`}
               >
                 <span className="mr-1">{category.icon}</span>
                 {category.nameBn}
@@ -214,7 +223,6 @@ export default function Navbar() {
                 className="flex items-center gap-2 border-r border-gray-200 px-5 py-2.5 text-sm"
               >
                 <span>{product.categoryIcon}</span>
-
                 <span className="text-gray-700">{product.nameBn}</span>
 
                 <span className="font-medium text-gray-800">
@@ -223,13 +231,12 @@ export default function Navbar() {
                 </span>
 
                 <span
-                  className={`font-semibold ${
-                    isUp
+                  className={`font-semibold ${isUp
                       ? "text-red-500"
                       : isDown
                         ? "text-green-600"
                         : "text-gray-500"
-                  }`}
+                    }`}
                 >
                   {isUp
                     ? `▲ ${toBengaliNumber(product.change.pct)}%`

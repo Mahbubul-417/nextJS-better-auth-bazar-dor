@@ -25,7 +25,7 @@ type Product = {
   };
 };
 
-const API_URL ="https://api.api-store.workers.dev/api/bazardor/products";
+const API_URL = "https://api.api-store.workers.dev/api/bazardor/products";
 
 function toBengaliNumber(value: number | string) {
   const digits = "০১২৩৪৫৬৭৮৯";
@@ -79,10 +79,10 @@ function ProductCard({ product }: { product: Product }) {
 
         <span
           className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isUp
-              ? "bg-red-50 text-red-700"
-              : isDown
-                ? "bg-green-50 text-green-600"
-                : "bg-gray-100 text-gray-600"
+            ? "bg-red-50 text-red-700"
+            : isDown
+              ? "bg-green-50 text-green-600"
+              : "bg-gray-100 text-gray-600"
             }`}
         >
           {isUp
@@ -139,7 +139,13 @@ function ProductSection({
       <div className="mb-6 flex items-end justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl">{icon}</span>
+           <span
+  className={`text-2xl ${
+    icon === "▼" ? "text-green-600" : "text-red-600"
+  }`}
+>
+  {icon}
+</span>
             <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
               {title}
             </h2>
@@ -242,10 +248,10 @@ export default function HomePage() {
 
   return (
     <main>
-      
+
       <Banner></Banner>
 
-     
+
       <div className="mx-auto max-w-6xl px-4">
         {error ? (
           <div className="my-10 rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
@@ -284,8 +290,8 @@ export default function HomePage() {
               title="যেসব পণ্যের দাম বাড়ছে"
               subtitle="গতকালের তুলনায় যেসব পণ্যের দাম বেড়েছে"
               products={risers}
-              icon="🔺"
-      
+              icon="▲"
+
               emptyMessage="এই মুহূর্তে দাম বাড়ার তথ্য পাওয়া যায়নি।"
             />
 
@@ -295,12 +301,8 @@ export default function HomePage() {
               title="যেসব পণ্যের দাম কমছে"
               subtitle="গতকালের তুলনায় যেসব পণ্যের দাম কমেছে"
               products={fallers}
+              icon="▼"
               
-              
-             icon="▼"
-             
-             
-             
               emptyMessage="এই মুহূর্তে দাম কমার তথ্য পাওয়া যায়নি।"
             />
 

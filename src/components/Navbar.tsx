@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -6,8 +5,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
-
-
 
 type Category = {
   id: string;
@@ -125,91 +122,94 @@ export default function Navbar() {
   const date = getBengaliDate();
 
   return (
-    <header className="border-b border-gray-200 bg-white">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="flex min-h-[76px] items-center justify-between gap-4">
-          <Link href="/" className="flex shrink-0 items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-600">
-              <Image
-                src="/images/logo-icon.png"
-                alt="বাজার দর"
-                width={30}
-                height={30}
-                priority
-              />
+    <>
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex min-h-[76px] items-center justify-between gap-4">
+            <Link href="/" className="flex shrink-0 items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-600">
+                <Image
+                  src="/images/logo-icon.png"
+                  alt="বাজার দর"
+                  width={30}
+                  height={30}
+                  priority
+                />
+              </div>
+
+              <div>
+                <h1 className="text-xl font-bold leading-none text-gray-800 sm:text-2xl">
+                  বাজার দর
+                </h1>
+                <p className="mt-1 text-xs text-gray-500">{date}</p>
+              </div>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              {isPending ? (
+                <span className="text-sm text-gray-500">লোড হচ্ছে...</span>
+              ) : session?.user ? (
+                <>
+                  <span className="hidden max-w-36 truncate text-sm font-medium text-gray-700 sm:block">
+                    {session.user.name || session.user.email}
+                  </span>
+
+                  <Link
+                    href="/profile"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-green-700 transition hover:bg-green-50"
+                  >
+                    My Profile
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    disabled={loggingOut}
+                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-red-300 hover:text-red-600 disabled:opacity-60 sm:px-4"
+                  >
+                    {loggingOut ? "লগ আউট হচ্ছে..." : "লগ আউট"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/signin"
+                    className="hidden px-3 py-2 text-sm font-medium text-gray-700 transition hover:text-green-600 sm:block sm:px-4"
+                  >
+                    সাইন ইন
+                  </Link>
+
+                  <Link
+                    href="/signup"
+                    className="rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-green-700 sm:px-5"
+                  >
+                    সাইন আপ
+                  </Link>
+                </>
+              )}
             </div>
-
-            <div>
-              <h1 className="text-xl font-bold leading-none text-gray-800 sm:text-2xl">
-                বাজার দর
-              </h1>
-              <p className="mt-1 text-xs text-gray-500">{date}</p>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-2">
-            {isPending ? (
-              <span className="text-sm text-gray-500">লোড হচ্ছে...</span>
-            ) : session?.user ? (
-              <>
-                <span className="hidden max-w-36 truncate text-sm font-medium text-gray-700 sm:block">
-                  {session.user.name || session.user.email}
-                </span>
-
-                 <Link
-                  href="/profile"
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-green-700 transition hover:bg-green-50"
-                >
-                  My Profile
-                </Link> 
-                
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  disabled={loggingOut}
-                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-red-300 hover:text-red-600 disabled:opacity-60 sm:px-4"
-                >
-                  {loggingOut ? "লগ আউট হচ্ছে..." : "লগ আউট"}
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/signin"
-                  className="hidden px-3 py-2 text-sm font-medium text-gray-700 transition hover:text-green-600 sm:block sm:px-4"
-                >
-                  সাইন ইন
-                </Link>
-
-                <Link
-                  href="/signup"
-                  className="rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-green-700 sm:px-5"
-                >
-                  সাইন আপ
-                </Link>
-              </>
-            )}
           </div>
         </div>
-      </div>
 
-      <nav className="border-t border-gray-100">
-        <div className="mx-auto max-w-6xl overflow-x-auto px-4">
-          <div className="flex min-w-max items-center">
-            {categories.map((category, index) => (
-              <Link
-                key={category.id}
-                href={`/category/${category.slug}`}
-                className="whitespace-nowrap border-b-2 border-transparent px-4 py-3 text-sm text-gray-600 transition hover:border-green-300 hover:text-green-700"
-              >
-                <span className="mr-1">{category.icon}</span>
-                {category.nameBn}
-              </Link>
-            ))}
+        <nav className="border-t border-gray-100">
+          <div className="mx-auto max-w-6xl overflow-x-auto px-4">
+            <div className="flex min-w-max items-center">
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/category/${category.slug}`}
+                  className="whitespace-nowrap border-b-2 border-transparent px-4 py-3 text-sm text-gray-600 transition hover:border-green-300 hover:text-green-700"
+                >
+                  <span className="mr-1">{category.icon}</span>
+                  {category.nameBn}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
+    
       <div className="overflow-hidden border-t border-gray-100 bg-gray-50">
         <div className="flex w-max animate-[marquee_30s_linear_infinite]">
           {[...products, ...products].map((product, index) => {
@@ -230,12 +230,13 @@ export default function Navbar() {
                 </span>
 
                 <span
-                  className={`font-semibold ${isUp
+                  className={`font-semibold ${
+                    isUp
                       ? "text-red-500"
                       : isDown
                         ? "text-green-600"
                         : "text-gray-500"
-                    }`}
+                  }`}
                 >
                   {isUp
                     ? `▲ ${toBengaliNumber(product.change.pct)}%`
@@ -248,6 +249,6 @@ export default function Navbar() {
           })}
         </div>
       </div>
-    </header>
+    </>
   );
 }

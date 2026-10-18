@@ -106,7 +106,7 @@ export default function UpdateProfilePage() {
             disabled={loading || !name.trim()}
             className="w-full rounded-lg bg-green-700 py-3 font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "আপডেট হচ্ছে..." : "Update Information"}
+            {loading ? "আপডেট হচ্ছে..." : "আপনার নাম পরিবর্তন করুন"}
           </button>
 
           <Link

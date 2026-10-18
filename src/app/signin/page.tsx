@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignInPage() {
@@ -166,24 +166,37 @@ export default function SignInPage() {
           <div className="h-px flex-1 bg-gray-200" />
         </div>
 
+      
+
         <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            disabled={loading || socialLoading}
-            onClick={() => handleSocialSignIn("google")}
-            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
-          >
-            {socialLoading ? "অপেক্ষা করুন..." : "Google"}
-          </button>
-          <button
-            type="button"
-            disabled={loading || socialLoading}
-            onClick={() => handleSocialSignIn("github")}
-            className="rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
-          >
-            {socialLoading ? "অপেক্ষা করুন..." : "GitHub"}
-          </button>
-        </div>
+  <button
+    type="button"
+    disabled={loading || socialLoading}
+    onClick={() => handleSocialSignIn("google")}
+    className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+  >
+    <img
+      src="https://www.svgrepo.com/show/475656/google-color.svg"
+      alt="Google"
+      className="h-5 w-5"
+    />
+    {socialLoading ? "Google" : "Google"}
+  </button>
+
+  <button
+    type="button"
+    disabled={loading || socialLoading}
+    onClick={() => handleSocialSignIn("github")}
+    className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+  >
+    <img
+      src="https://github.githubassets.com/favicons/favicon.svg"
+      alt="GitHub"
+      className="h-5 w-5"
+    />
+    {socialLoading ? "GitHub" : "GitHub"}
+  </button>
+</div>
 
         <p className="mt-6 text-center text-sm text-gray-600">
           অ্যাকাউন্ট নেই?{" "}

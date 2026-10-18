@@ -4,8 +4,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
+
+
 
 type Category = {
   id: string;
@@ -154,12 +156,12 @@ export default function Navbar() {
                   {session.user.name || session.user.email}
                 </span>
 
-                <Link
+                 <Link
                   href="/profile"
                   className="rounded-lg px-3 py-2 text-sm font-medium text-green-700 transition hover:bg-green-50"
                 >
                   My Profile
-                </Link>
+                </Link> 
                 
                 <button
                   type="button"
@@ -198,10 +200,7 @@ export default function Navbar() {
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm transition ${index === 0
-                    ? "border-green-600 font-semibold text-green-700"
-                    : "border-transparent text-gray-600 hover:border-green-300 hover:text-green-700"
-                  }`}
+                className="whitespace-nowrap border-b-2 border-transparent px-4 py-3 text-sm text-gray-600 transition hover:border-green-300 hover:text-green-700"
               >
                 <span className="mr-1">{category.icon}</span>
                 {category.nameBn}

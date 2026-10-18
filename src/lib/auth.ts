@@ -31,6 +31,6 @@ export const auth = betterAuth({
 },
 
   trustedOrigins: ["http://localhost:3000",
-    "https://bazar-dor-site.netlify.app/"
+     "https://bazar-dor-site.netlify.app"
   ],
 });
